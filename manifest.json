@@ -7,12 +7,6 @@
         "persistent": false,
         "scripts": ["background.js"]
     },
-    "content_scripts": [
-        {
-            "matches": ["*://www.zillow.com/*"],
-            "js": ["content.js"]
-        }
-    ],
     "permissions": ["bookmarks", "*://www.zillow.com/*"],
     "icons": {
         "20": "zillow_thumbnail.png"

@@ -8,7 +8,7 @@ function processBookmark(bookmarks, folder_name) {
                     alert("Sorry, the folder you selected appears to not contain any bookmarks.");
                     return true;
                 }
-                parseBookmarks(bookmark.children);
+                openBookmarksForParsing(bookmark.children);
                 return true;
             }
         }
@@ -31,24 +31,19 @@ var processBookmarks = function (folder_name) {
     };
 };
 
-function parseBookmarks(children) {
-    var text = "";
-    for (var j = 0; j < children.length; j++) {
-        var node = children[j];
-        text += node.title + "  :  " + node.url + "\n";
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                alert(xhr.responseText);
-            }
-        };
-        xhr.open("GET", node.url, true);
-        xhr.send();
+function openBookmarksForParsing(bookmarksToOpen) {
+    for (var j = 0; j < bookmarksToOpen.length; j++) {
+        var bookmark = bookmarksToOpen[j];
+        var createProperties = {"active": false, "url": bookmark.url};
+        chrome.tabs.create(createProperties, function (tab) {
+            var details = {"file": "content.js"};
+            chrome.tabs.executeScript(tab.id, details);
+        });
     }
-    alert(text);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+
     document.getElementById("submit-button").addEventListener("click", function () {
         var folder_name = document.getElementById("folder-name").value;
         chrome.bookmarks.getTree(processBookmarks(folder_name));

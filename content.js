@@ -12,14 +12,16 @@ var bath = apt_info.match(/\s([0-9]+)\sbath/)[1];
 var bed = apt_info.match(/\s([0-9]+)\sbed/)[1];
 var sqft = apt_info.match(/\s([0-9]+)\ssqft/)[1];
 
-var rental_price = document.getElementsByClassName("main-row home-summary-row")[0];
+var rental_price = document.getElementsByClassName("main-row home-summary-row")[0].textContent;
 
-rental["address"] = address;
+rental["address"] = address.trim();
 rental["bed"] = bed;
 rental["bath"] = bath;
 rental["sqft"] = sqft;
-rental["rental_price"] = rental_price;
+rental["rental_price"] = rental_price.trim();
 
 console.log(rental);
 
 chrome.extension.sendMessage(rental);
+
+window.close();
