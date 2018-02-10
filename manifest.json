@@ -1,0 +1,24 @@
+{
+    "name": "Zillow Apartment Analyzer",
+    "manifest_version": 2,
+    "version": "1.0",
+    "description": "Aggregates information about apartments on zillow that you have saved as bookmarks.",
+    "background": {
+        "persistent": false,
+        "scripts": ["background.js"]
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://www.zillow.com/*"],
+            "js": ["content.js"]
+        }
+    ],
+    "permissions": ["bookmarks", "*://www.zillow.com/*"],
+    "icons": {
+        "20": "zillow_thumbnail.png"
+    },
+    "browser_action": {
+        "default_title": "Zillow Apartment Analyzer",
+        "default_icon": "zillow_thumbnail.png"
+    }
+}
