@@ -9,10 +9,11 @@
     },
     "permissions": ["bookmarks", "*://www.zillow.com/*"],
     "icons": {
-        "20": "zillow_thumbnail.png"
+        "20": "static/zillow_thumbnail.png"
     },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "browser_action": {
         "default_title": "Zillow Apartment Analyzer",
-        "default_icon": "zillow_thumbnail.png"
+        "default_icon": "static/zillow_thumbnail.png"
     }
 }
