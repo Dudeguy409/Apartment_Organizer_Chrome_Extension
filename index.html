@@ -9,10 +9,45 @@ and open the template in the editor.
         <title>Zillow Apartment Analyzer</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="static/bootstrap.min.css" rel="stylesheet">
+        <link href="tablesorter/themes/blue/style.css" rel="stylesheet">
+        <script type="text/javascript" src="static/jquery.min.js" defer></script>
+        <script type="text/javascript" src="tablesorter/jquery.tablesorter.min.js" defer></script>
+        <script type="text/javascript" src="static/bootstrap.min.js" defer></script>
         <script type="text/javascript" src="index.js" defer></script>
     </head>
     <body>
-        <div>Path to bookmark folder: <input id="folder-name" type="text" value="zillowtest" name="bookmarks"></div>
-        <div><button id="submit-button" type="button">Go!</button></div>
+        <div id="form-panel" class="container-fluid">
+            <div class="jumbotron" style="text-align: center">
+                <h1>Select Your Bookmarks</h1>
+            </div>
+            <div class="form-group form-horizontal  col-md-4 col-md-offset-4 mx-auto">
+                <label for="folder-name"><h3>Path To Your Bookmark Folder:</h3></label>
+                <input id="folder-name" type="text" class="form-control my-2" value="zillowtest" name="bookmarks">
+                <button id="submit-button" class="btn btn-primary btn-lg my-2" type="button">Go!</button>
+            </div>
+        </div>
+        <div id="results-panel" class="container-fluid" style="display:none">
+            <div class="container">  
+                <div class="jumbotron" style="text-align: center">
+                    <h1>Results</h1>
+                </div>
+            </div>
+            <table id="apartments-table" class="tablesorter table table-striped table-bordered">             
+                <thead>
+                    <tr> 
+                        <th>Monthly Rental Price</th> 
+                        <th>Sqft</th> 
+                        <th>Bed</th> 
+                        <th>Bath</th> 
+                        <th>Availability</th> 
+                        <th>Address</th> 
+                        <th>Unit #</th>
+                    </tr> 
+                </thead> 
+                <tbody> 
+                </tbody> 
+            </table>
+        </div>
     </body>
 </html>
