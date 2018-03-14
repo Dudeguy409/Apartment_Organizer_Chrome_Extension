@@ -141,8 +141,7 @@ function handleErrorMessage(error) {
 
 $(function () { // Document is ready.
 
-    /*const errors = [];
-     const rentals = [];*/
+     //const rentals = [];
 
     // Create a custom formatter to use with tablesorter.
     $.tablesorter.addParser({
