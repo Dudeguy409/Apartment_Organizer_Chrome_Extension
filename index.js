@@ -43,9 +43,16 @@ function findBookmarks(folder_name) {
         }
     };
 }
-
+/* 
+ * This function opens a tab for the given url if it refers to a Zillow listing.
+ * It then injects the needed content scripts for parsing.  If a url links to a
+ * building page in preview mode, the link is hacked up to make a link to
+ * the full-screen page so that it parses correctly. 
+ */
 function openListingTabToParse(url) {
+    // Only open Zillow tabs
     if (url.match(/[a-z]+:\/\/www\.zillow\.com\/.+/)) {
+        // Convert urls to building listings in preview mode to full-screen mode.
         const bldg = /([a-z]+:\/\/www\.zillow\.com\/).*_type(\/.*_bldg)\/.*/.exec(url);
         if (bldg) {
             url = bldg[1] + "b" + bldg[2];
@@ -63,10 +70,8 @@ function openListingTabToParse(url) {
 }
 
 /*
- * This function opens a tab for each bookmark anywhere in the folder that the
- * user specified, but only if it refers to a Zillow web page.  If a bookmark
- * links to a building page in preview mode, the linked is hacked up to make a
- * link to the full-screen page so that it parses correctly.
+ * This function tries to open a tab for each bookmark anywhere inside the folder 
+ * that the user specified, recursively searching nested folders.
  */
 function openBookmarksForParsing(bookmarksToOpen) {
     for (let j = 0; j < bookmarksToOpen.length; j++) {
@@ -80,26 +85,10 @@ function openBookmarksForParsing(bookmarksToOpen) {
     }
 }
 
-function handleSearchMessage(listings) {
-    for (let i = 0; i < listings.length; i++) {
-        console.log(listings[i]);
-        openListingTabToParse(listings[i]);
-    }
-    $("#results-panel").slideDown(500);
-}
-
-function handleErrorMessage(error) {
-    // Show the error panel if it isn't visible yet.
-    if (!$("#error-panel").is(":visible")) {
-        $("#error-panel").slideDown(500);
-    }
-    // Append a link in the error table to the page that failed to be parsed.
-    $("#error-table").find("tbody").first()
-            .append("<tr><td style='text-align: center'><a href='"
-                    + error.url + "'><h4><strong>"
-                    + error.title + "</strong></h4></a></td></tr>");
-}
-
+/*
+ * Handles messages containing results from tabs of successfully parsed
+ * listings by appending the results to the results table. 
+ */
 function handleResultsMessage(rentals) {
     const $tbody = $("#apartments-table").find("tbody");
     // Each element in the array represents a rental; add a row for each.
@@ -122,10 +111,40 @@ function handleResultsMessage(rentals) {
     $("#apartments-table").trigger("update");
 }
 
+/*
+ * Handles error messages generated from parsing failures by appending info
+ * about the tab to the error table, and showing it if needed. 
+ */
+function handleSearchMessage(listings) {
+    for (let i = 0; i < listings.length; i++) {
+        console.log(listings[i]);
+        openListingTabToParse(listings[i]);
+    }
+    $("#results-panel").slideDown(500);
+}
+
+/*
+ * Handles error messages generated from parsing failures by appending info
+ * about the tab to the error table, and showing it if needed. 
+ */
+function handleErrorMessage(error) {
+    // Show the error panel if it isn't visible yet.
+    if (!$("#error-panel").is(":visible")) {
+        $("#error-panel").slideDown(500);
+    }
+    // Append a link in the error table to the page that failed to be parsed.
+    $("#error-table").find("tbody").first()
+            .append("<tr><td style='text-align: center'><a href='"
+                    + error.url + "'><h4><strong>"
+                    + error.title + "</strong></h4></a></td></tr>");
+}
+
 $(function () { // Document is ready.
 
-    const errors = [];
+    /*const errors = [];
+     const rentals = [];*/
 
+    // Create a custom formatter to use with tablesorter.
     $.tablesorter.addParser({
         id: 'just_numbers',
         is: function (s) {
@@ -143,7 +162,7 @@ $(function () { // Document is ready.
         type: 'numeric'
     });
 
-// add my custom numbers mapper/parser/filter to several columns:
+    // Add the custom formatter for numbers to several columns:
     $("#apartments-table").tablesorter({
         headers: {
             0: {// Monthly Rental Price
@@ -158,40 +177,52 @@ $(function () { // Document is ready.
         }
     });
 
+    // Simulate a button click on the 'Go!' button if the user
+    // hits 'Enter' while in the bookmarks folder input text box.
     const $folder_input = $("#folder-name");
-
     $folder_input.keyup(function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
-            // Simulate a button click if the user hits 'Enter'
+
             $("#submit-button").click();
         }
     });
 
-    // If the button is clicked, find the bookmarks and open them up to be parsed.
+    // If the 'Go!' button is clicked, try to find the right bookmarks folder
+    // and open the bookmarks it contains in new tabs so that they can be parsed.
     $("#submit-button").on("click", function () {
         const folder_name = $("#folder-name").val();
         chrome.bookmarks.getTree(findBookmarks(folder_name));
         // The user is done with the bookmarks panel, so hide it.
         $("#form-panel").slideUp(500, function () {
-            // Show the results table instead, but not until the previous panel is hidden.
+            // Show the results table instead, but not until the bookmarks panel is hidden.
             $("#results-panel").slideDown(500);
         });
     });
 
-    // Consolidate records retrieved by the various tabs.
+    /*
+     * Handle various types of messages from content scripts on zillow tabs:
+     * 
+     * 1) Append results from successfully parsed tabs to the results table.
+     * 2) Open urls sent from a search tab as tabs to be parsed
+     * 3) Report parsing errors to the error table.
+     */
     chrome.extension.onMessage.addListener(function (message) {
         if (message.rentals) {
             handleResultsMessage(message.rentals);
-        } else if (message.error) {
-            handleErrorMessage(message.error);
         } else if (message.listings) {
+            handleErrorMessage(message.error);
+        } else if (message.error) {
             handleSearchMessage(message.listings);
         }
     });
 
+    /*
+     * If the user DID NOT open the extension during a zillow search,
+     * show the bookmark folder selection UI.
+     */
     if (window.location.href.includes("search=false")) {
-        // Show the form for selecting abookmarks folder.
+        // Show the form for selecting a bookmarks folder.
         $("#form-panel").slideDown(500);
         // Put the cursor inside the input box
         $folder_input.focus();
