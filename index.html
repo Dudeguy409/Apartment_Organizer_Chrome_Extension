@@ -17,7 +17,7 @@ and open the template in the editor.
         <script type="text/javascript" src="index.js" defer></script>
     </head>
     <body>
-        <div id="form-panel" class="container-fluid">
+        <div id="form-panel" class="container-fluid" style="display:none">
             <div class="jumbotron" style="text-align: center">
                 <h1>Select Your Bookmarks</h1>
             </div>
@@ -48,6 +48,22 @@ and open the template in the editor.
                 <tbody> 
                 </tbody> 
             </table>
+        </div>
+        <div id="error-panel" class="container-fluid" style="display:none">
+            <div class="container">  
+                <h3>The following pages of listings failed to be parsed.  This may be because the listings are no longer on the market.</h3>
+            </div>
+            <div class="col-md-4 col-md-offset-4 mx-auto">
+                <table id="error-table" class="table table-striped table-bordered">             
+                    <thead>
+                        <tr> 
+                            <th>Link</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody> 
+                    </tbody> 
+                </table>
+            </div>
         </div>
     </body>
 </html>
