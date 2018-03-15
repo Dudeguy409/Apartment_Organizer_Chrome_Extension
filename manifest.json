@@ -9,11 +9,15 @@
     },
     "permissions": ["bookmarks", "*://www.zillow.com/*"],
     "icons": {
-        "20": "static/zillow_thumbnail.png"
+        "16": "static/icon16.png",
+        "20": "static/icon20.png",
+        "32": "static/icon32.png",
+        "48": "static/icon48.png",
+        "128": "static/icon128.png"
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "browser_action": {
         "default_title": "Apartment Organizer For Zillow",
-        "default_icon": "static/zillow_thumbnail.png"
+        "default_icon": "static/icon20.png"
     }
 }

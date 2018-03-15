@@ -1,6 +1,12 @@
 "use strict";
 
 /* 
+ * Stores a copy of all data in the table.  When an table filter is used, the
+ * table is wiped clean and this datastructure is used to repopulate it.
+ */
+const rentals = [];
+
+/* 
  * This function recursively traverses the user's bookmark tree looking for a 
  * folder whose name matches the name that the user typed into the form box 
  * earlier.  When the first match is found, the function short-circuits
@@ -10,9 +16,11 @@ function findBookmark(bookmarks, folder_name) {
 
     for (let i = 0; i < bookmarks.length; i++) {
         const bookmark = bookmarks[i];
+
         if (!bookmark.url) {  // The current bookmark is a folder.
             if (bookmark.title === folder_name) {  // It's a match!
-                if (!bookmark.children) { // Found the folder, but it's empty.
+
+                if (!bookmark.children || bookmark.children.length === 0) { // Found the folder, but it's empty.
                     alert("Sorry, the folder you selected appears to not contain any bookmarks.");
                     return true;
                 }
@@ -72,6 +80,7 @@ function openListingTabToParse(url) {
 /*
  * This function tries to open a tab for each bookmark anywhere inside the folder 
  * that the user specified, recursively searching nested folders.
+ * It then hides the bookmarks panel and shows the results panel.
  */
 function openBookmarksForParsing(bookmarksToOpen) {
     for (let j = 0; j < bookmarksToOpen.length; j++) {
@@ -83,29 +92,44 @@ function openBookmarksForParsing(bookmarksToOpen) {
             openBookmarksForParsing(bookmark.children);
         }
     }
+    // The user is done with the bookmarks panel, so hide it.
+    $("#form-panel").slideUp(500, function () {
+        // Show the results table instead, but not until the bookmarks panel is hidden.
+        $("#results-panel").slideDown(500);
+    });
+}
+
+/*
+ * Appends the given rental to the results table as HTML content.
+ */
+function appendResultToTable(rental) {
+    const row = "<tr>" + [
+        rental.rental_price,
+        rental.sqft,
+        rental.bed,
+        rental.bath,
+        rental.availability,
+        "<a href='" + rental.url + "'>" + rental.address + "</a>",
+        rental.unit
+    ].map(function (s) {
+        return "<td>" + s + "</td>";
+    }).join() + "</tr>";
+    $("#apartments-table").find("tbody").append(row);
 }
 
 /*
  * Handles messages containing results from tabs of successfully parsed
- * listings by appending the results to the results table. 
+ * listings by appending the results to the results table.  Also, add each
+ * result to the rentals list so that they can be used with the table filder.
  */
-function handleResultsMessage(rentals) {
-    const $tbody = $("#apartments-table").find("tbody");
-    // Each element in the array represents a rental; add a row for each.
-    for (let i = 0; i < rentals.length; i++) {
-        const rental = rentals[i];
-        const row = "<tr>" + [
-            rental.rental_price,
-            rental.sqft,
-            rental.bed,
-            rental.bath,
-            rental.availability,
-            "<a href='" + rental.url + "'>" + rental.address + "</a>",
-            rental.unit
-        ].map(function (s) {
-            return "<td>" + s + "</td>";
-        }).join() + "</tr>";
-        $tbody.append(row);
+function handleResultsMessage(results) {
+
+    // Each element in the array represents a rental; 
+    // Add a row to the results table for each.
+    for (let i = 0; i < results.length; i++) {
+        appendResultToTable(results[i]);
+        // Also append it to the rentals list for use with a table filter.
+        rentals.push(results[i]);
     }
     // Notify the tablesorter that the data in the table has changed.
     $("#apartments-table").trigger("update");
@@ -117,7 +141,6 @@ function handleResultsMessage(rentals) {
  */
 function handleSearchMessage(listings) {
     for (let i = 0; i < listings.length; i++) {
-        console.log(listings[i]);
         openListingTabToParse(listings[i]);
     }
     $("#results-panel").slideDown(500);
@@ -139,9 +162,97 @@ function handleErrorMessage(error) {
                     + error.title + "</strong></h4></a></td></tr>");
 }
 
-$(function () { // Document is ready.
+/*
+ * When the user hits the 'Update Filter' button, this code is run.
+ * First, the values that the user entered into the min and max fields are
+ * checked for validity.  Then, the table is wiped, and repopulated one row at
+ * a time with rentals that match the values that the user specified.
+ * Lastly, the tablesorter is notified of the update.
+ */
+function updateTableFilter() {
 
-     //const rentals = [];
+    /*
+     * If the user entered a value above or below a field's min or max value,
+     * set the field to the nearest allowed value. 
+     */
+    $("#update-filter-panel").find("input").each(function () {
+        let val = $(this).val();
+        if (val) {
+            val = parseFloat(val, 10);
+            const min = parseFloat($(this).attr("min"), 10);
+            const max = parseFloat($(this).attr("max"), 10);
+            if (val < min) {
+                $(this).val(min);
+            } else if (val > max) {
+                $(this).val(max);
+            }
+        }
+    });
+
+    let price_min = $("#price-min").val();
+    let price_max = $("#price-max").val();
+    let sqft_min = $("#sqft-min").val();
+    let sqft_max = $("#sqft-max").val();
+    let bed_min = $("#bed-min").val();
+    let bed_max = $("#bed-max").val();
+
+    /*
+     * Make sure that the user didn't enter a higher value 
+     * in a min field than in its corresponding max field.
+     */
+    let diff_error = [];
+    if (price_min && price_max) {
+        if (parseFloat(price_min, 10) > parseFloat(price_max, 10)) {
+            diff_error.push("The min price must be less than or equal to the max price.\n");
+        }
+    }
+    if (sqft_min && sqft_max) {
+        if (parseFloat(sqft_min, 10) > parseFloat(sqft_max, 10)) {
+            diff_error.push("The min sqft must be less than or equal to the max sqft.\n");
+        }
+    }
+    if (bed_min && bed_max) {
+        if (parseFloat(bed_min, 10) > parseFloat(bed_max, 10)) {
+            diff_error.push("The min bedroom # must be less than or equal to the max bedroom #.\n");
+        }
+    }
+
+    if (diff_error.length !== 0) {
+
+        // Tell the user to fix thei input, and don't update the table.
+        alert(diff_error.join("\n"));
+
+    } else {
+
+        // Empty the current contents of the results table.
+        $("#apartments-table").find("tbody").empty();
+
+        for (let i = 0; i < rentals.length; i++) {
+            const rental = rentals[i];
+            let {rental_price, sqft, bed} = rental;
+
+            // Format the values of the rental to make them comparable to the filter.
+            rental_price = rental_price.replace(/[^\d.]/g, '');
+            sqft = sqft.replace(/[^\d.]/g, '');
+            bed = bed.toLowerCase().replace(/studio/, '0').replace(/[^\d.]/g, '');
+
+            const valid = (!price_min || parseFloat(rental_price, 10) >= parseFloat(price_min, 10))
+                    && (!price_max || parseFloat(rental_price, 10) <= parseFloat(price_max, 10))
+                    && (!sqft_min || parseFloat(sqft, 10) >= parseFloat(sqft_min, 10))
+                    && (!sqft_max || parseFloat(sqft, 10) <= parseFloat(sqft_max, 10))
+                    && (!bed_min || parseFloat(bed, 10) >= parseFloat(bed_min, 10))
+                    && (!bed_max || parseFloat(bed, 10) <= parseFloat(bed_max, 10));
+
+            if (valid) {
+                appendResultToTable(rentals[i]);
+            }
+        }
+        // Notify the tablesorter that the data in the table has changed.
+        $("#apartments-table").trigger("update");
+    }
+}
+
+$(function () { // Document is ready.
 
     // Create a custom formatter to use with tablesorter.
     $.tablesorter.addParser({
@@ -176,6 +287,9 @@ $(function () { // Document is ready.
         }
     });
 
+    //Add a listener to the button to update the table filter on click.
+    $("#update-filter-button").on("click", updateTableFilter);
+
     // Simulate a button click on the 'Go!' button if the user
     // hits 'Enter' while in the bookmarks folder input text box.
     const $folder_input = $("#folder-name");
@@ -192,11 +306,6 @@ $(function () { // Document is ready.
     $("#submit-button").on("click", function () {
         const folder_name = $("#folder-name").val();
         chrome.bookmarks.getTree(findBookmarks(folder_name));
-        // The user is done with the bookmarks panel, so hide it.
-        $("#form-panel").slideUp(500, function () {
-            // Show the results table instead, but not until the bookmarks panel is hidden.
-            $("#results-panel").slideDown(500);
-        });
     });
 
     /*
@@ -210,9 +319,9 @@ $(function () { // Document is ready.
         if (message.rentals) {
             handleResultsMessage(message.rentals);
         } else if (message.listings) {
-            handleErrorMessage(message.error);
-        } else if (message.error) {
             handleSearchMessage(message.listings);
+        } else if (message.error) {
+            handleErrorMessage(message.error);
         }
     });
 
