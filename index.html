@@ -23,7 +23,7 @@ and open the template in the editor.
             </div>
             <div class="form-group form-horizontal  col-md-4 col-md-offset-4 mx-auto">
                 <label for="folder-name"><h3>Path To Your Bookmark Folder:</h3></label>
-                <input id="folder-name" type="text" class="form-control my-2" value="zillowtest" name="bookmarks">
+                <input id="folder-name" type="text" class="form-control my-2" placeholder="Folder Name" name="bookmarks"/>
                 <button id="submit-button" class="btn btn-primary btn-lg my-2" type="button">Go!</button>
             </div>
         </div>
@@ -33,11 +33,40 @@ and open the template in the editor.
                     <h1>Results</h1>
                 </div>
             </div>
+            <div class="container-fluid col-md-8 col-md-offset-2 mx-auto">  
+                <div class="form-panel row" id="update-filter-panel" >
+                    <div class="form-panel form-vertical col-md-3">                   
+                        <label >Filter by Price :</label>
+                        <div class="form-panel row">
+                            <input id="price-min" type="number" min="0" max="40000" placeholder="Min" class="form-control col-md-4 mx-2"/>    
+                            <input id="price-max" type="number" min="0" max="40000" placeholder="Max" class="form-control col-md-4 mx-2"/>
+                        </div>      
+                    </div>
+                    <div class="form-panel form-vertical col-md-3">                    
+                        <label >Filter by Sq. Ft. :</label>
+                        <div class="form-panel row">
+                            <input id="sqft-min" type="number" min="0" max="30000" placeholder="Min" class="form-control col-md-4 mx-2"/>    
+                            <input id="sqft-max" type="number" min="0" max="30000" placeholder="Max" class="form-control col-md-4 mx-2"/>
+                        </div>
+                    </div>      
+                    <div class="form-panel form-vertical col-md-3">                    
+                        <label >Filter by # Bedrooms :</label>
+                        <div class="form-panel row">
+                            <input id="bed-min" type="number" min="0" max="30" placeholder="Min" class="form-control col-md-4 mx-2"/>    
+                            <input id="bed-max" type="number" min="0" max="30" placeholder="Max" class="form-control col-md-4 mx-2"/>
+                        </div>
+                    </div>     
+                    <div class="form-panel col-md-3">
+                        <button id="update-filter-button" class="btn btn-primary btn-lg my-2" type="button">Update Filter</button>
+                    </div>
+                </div>
+            </div>
+            <div class="my-4">
             <table id="apartments-table" class="tablesorter table table-striped table-bordered">             
                 <thead>
                     <tr> 
                         <th>Monthly Rental Price</th> 
-                        <th>Sqft</th> 
+                        <th>Sq. Ft.</th> 
                         <th>Bed</th> 
                         <th>Bath</th> 
                         <th>Availability</th> 
@@ -48,6 +77,7 @@ and open the template in the editor.
                 <tbody> 
                 </tbody> 
             </table>
+            </div>
         </div>
         <div id="error-panel" class="container-fluid" style="display:none">
             <div class="container">  

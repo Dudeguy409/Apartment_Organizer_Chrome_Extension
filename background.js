@@ -1,3 +1,5 @@
+"use strict";
+
 /* 
  * When the user clicks the browserAction icon in the toolbar,
  * open the extension's index page as the active tab.
