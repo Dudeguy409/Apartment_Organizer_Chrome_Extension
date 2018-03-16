@@ -6,19 +6,19 @@
     "description": "Organize data from a bunch of different Zillow listings into one convenient table that can sort and filter out results. ",
     "background": {
         "persistent": false,
-        "scripts": ["background.js"]
+        "scripts": ["app/background.js"]
     },
     "permissions": ["bookmarks", "*://www.zillow.com/*"],
     "icons": {
-        "16": "static/icon16.png",
-        "20": "static/icon20.png",
-        "32": "static/icon32.png",
-        "48": "static/icon48.png",
-        "128": "static/icon128.png"
+        "16": "icon/icon16.png",
+        "20": "icon/icon20.png",
+        "32": "icon/icon32.png",
+        "48": "icon/icon48.png",
+        "128": "icon/icon128.png"
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "browser_action": {
         "default_title": "Apartment Organizer For Zillow",
-        "default_icon": "static/icon20.png"
+        "default_icon": "icon/icon20.png"
     }
 }

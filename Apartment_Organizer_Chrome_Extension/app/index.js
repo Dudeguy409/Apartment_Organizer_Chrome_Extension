@@ -70,7 +70,7 @@ function openListingTabToParse(url) {
         const createProperties = {"active": false, url};
         chrome.tabs.create(createProperties, function (tab) {
             // The content script depends on jQuery, so load it first.
-            chrome.tabs.executeScript(tab.id, {"file": "static/jquery.min.js"}, function () {
+            chrome.tabs.executeScript(tab.id, {"file": "lib/jquery.min.js"}, function () {
                 chrome.tabs.executeScript(tab.id, {"file": "listing_content.js"});
             });
         });

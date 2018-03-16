@@ -9,15 +9,15 @@
  * page whether this was done or not, so that it can know
  * whether to show the user interface for selecting bookmarks.
  */
-const createProperties = {"url": "/index.html?search=", "active": true};
+const createProperties = {"url": "/app/index.html?search=", "active": true};
 chrome.runtime.onInstalled.addListener(function () {
     chrome.browserAction.onClicked.addListener(function (tab) {
 
         if (tab.url) {
             if (tab.url.match(/[a-z]+:\/\/www\.zillow\.com\/homes\/for_rent\/.+/)) {
                 // The content script depends on jQuery, so load it first.
-                chrome.tabs.executeScript(tab.id, {"file": "static/jquery.min.js"}, function () {
-                    chrome.tabs.executeScript(tab.id, {"file": "search_content.js"});
+                chrome.tabs.executeScript(tab.id, {"file": "/lib/jquery.min.js"}, function () {
+                    chrome.tabs.executeScript(tab.id, {"file": "/app/search_content.js"});
                 });
                 createProperties.url += "true";
             } else {
