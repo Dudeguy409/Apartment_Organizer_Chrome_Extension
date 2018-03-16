@@ -2,7 +2,7 @@
     "name": "Apartment Organizer For Zillow",
     "short_name": "Apt Organizr",
     "manifest_version": 2,
-    "version": "1.0",
+    "version": "1.1",
     "description": "Organize data from a bunch of different Zillow listings into one convenient table that can sort and filter out results. ",
     "background": {
         "persistent": false,
