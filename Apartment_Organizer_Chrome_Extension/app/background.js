@@ -9,24 +9,41 @@
  * page whether this was done or not, so that it can know
  * whether to show the user interface for selecting bookmarks.
  */
-const createProperties = {"url": "/app/index.html?search=", "active": true};
-chrome.runtime.onInstalled.addListener(function () {
-    chrome.browserAction.onClicked.addListener(function (tab) {
 
-        if (tab.url) {
-            if (tab.url.match(/[a-z]+:\/\/www\.zillow\.com\/homes\/for_rent\/.+/)) {
-                // The content script depends on jQuery, so load it first.
-                chrome.tabs.executeScript(tab.id, {"file": "/lib/jquery.min.js"}, function () {
-                    chrome.tabs.executeScript(tab.id, {"file": "/app/search_content.js"});
-                });
-                createProperties.url += "true";
-            } else {
-                createProperties.url += "false";
-            }
-        } else {
-            createProperties.url += "false";
-        }
+function handleContentScriptInjectionIntoActiveSearchTab(tab) {
+    if (tab.url && tab.url.match(/[a-z]+:\/\/www\.zillow\.com\/homes\/for_rent\/.+/)) {
+        // The content script depends on jQuery, so load it first.
+        chrome.tabs.executeScript(tab.id, {"file": "/lib/jquery.min.js"}, function () {
+            chrome.tabs.executeScript(tab.id, {"file": "/app/search_content.js"});
+        });
+        return true;
+    }
+    return false;
+}
 
-        chrome.tabs.create(createProperties);
-    });
-});
+function handleBrowserActionClickEvent(tab) {
+    const createProperties = {"url": "/app/index.html?search=", "active": true};
+    createProperties.url += handleContentScriptInjectionIntoActiveSearchTab(tab);
+    chrome.tabs.create(createProperties);
+}
+
+function addBrowserActionListener() {
+    chrome.browserAction.onClicked.addListener(handleBrowserActionClickEvent);
+}
+
+addBrowserActionListener();
+
+/*
+chrome.runtime.onInstalled.addListener(addBrowserActionListener);
+
+if (chrome.runtime && chrome.runtime.onStartup) {
+    chrome.runtime.onStartup.addListener(addBrowserActionListener);
+} else {
+    // This hack is needed because Chrome 22 does not persist browserAction icon
+    // state, and also doesn't expose onStartup. So the icon always starts out in
+    // wrong state. We don't actually use onStartup except as a clue that we're
+    // in a version of Chrome that has this problem.
+    chrome.windows.onCreated.addListener(addBrowserActionListener);
+}
+
+*/
