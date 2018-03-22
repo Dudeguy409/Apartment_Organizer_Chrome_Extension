@@ -1,5 +1,9 @@
 "use strict";
 
+const rentals = [];
+let url;
+let $body;
+
 function parseApartmentInfo(apt_info) {
     let bed;
     try {
@@ -12,7 +16,7 @@ function parseApartmentInfo(apt_info) {
     return {bed, bath, sqft};
 }
 
-function parseSingleListing(rentals, $body, url) {
+function parseSingleListing() {
     const $header = $body.find(".zsg-content-header.addr").first();
     let address = $header.find("H1").first().text().trim();
     try {
@@ -28,7 +32,7 @@ function parseSingleListing(rentals, $body, url) {
     rentals.push(rental);
 }
 
-function parseBuildingListing(rentals, $body, url) {
+function parseBuildingListing() {
     const $header = $body.find(".bdp-header").first();
     let address = ($header.find("H1").first().text() + " " + $header.find("H2").first().text()).trim();
     address = address.match(/(.+[0-9]{5}).*/)[1];
@@ -74,15 +78,14 @@ function parseBuildingListing(rentals, $body, url) {
 
 $(function () { // Document is ready.
 
-    const rentals = [];
-    const url = window.location.href;
-    const $body = $(".zsg-layout-content").first();
+    url = window.location.href;
+    $body = $(".zsg-layout-content").first();
 
     try {
         if (url.match(/[a-z]+:\/\/www\.zillow\.com\/b\/.+/)) {
-            parseBuildingListing(rentals, $body, url);
+            parseBuildingListing();
         } else {
-            parseSingleListing(rentals, $body, url);
+            parseSingleListing();
         }
         chrome.extension.sendMessage({rentals});
     } catch (err) {

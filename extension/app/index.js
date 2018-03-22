@@ -5,6 +5,19 @@
  * table is wiped clean and this datastructure is used to repopulate it.
  */
 const rentals = [];
+let $apartments_table;
+let $apartments_table_body;
+let $form_panel;
+let $results_panel;
+let $error_panel;
+let $error_table_body;
+let $update_filter_inputs;
+let $price_min;
+let $price_max;
+let $sqft_min;
+let $sqft_max;
+let $bed_min;
+let $bed_max;
 
 /* 
  * This function recursively traverses the user's bookmark tree looking for a 
@@ -93,10 +106,12 @@ function openBookmarksForParsing(bookmarksToOpen) {
         }
     }
     // The user is done with the bookmarks panel, so hide it.
-    $("#form-panel").slideUp(500, function () {
-        // Show the results table instead, but not until the bookmarks panel is hidden.
-        $("#results-panel").slideDown(500);
-    });
+    if ($form_panel.is(":visible")) {
+        $form_panel.slideUp(500, function () {
+            // Show the results table instead, but not until the bookmarks panel is hidden.
+            $results_panel.slideDown(500);
+        });
+    }
 }
 
 /*
@@ -114,7 +129,7 @@ function appendResultToTable(rental) {
     ].map(function (s) {
         return "<td>" + s + "</td>";
     }).join() + "</tr>";
-    $("#apartments-table").find("tbody").append(row);
+    $apartments_table_body.append(row);
 }
 
 /*
@@ -132,7 +147,7 @@ function handleResultsMessage(results) {
         rentals.push(results[i]);
     }
     // Notify the tablesorter that the data in the table has changed.
-    $("#apartments-table").trigger("update");
+    $apartments_table.trigger("update");
 }
 
 /*
@@ -143,7 +158,7 @@ function handleSearchMessage(listings) {
     for (let i = 0; i < listings.length; i++) {
         openListingTabToParse(listings[i]);
     }
-    $("#results-panel").slideDown(500);
+    $results_panel.slideDown(500);
 }
 
 /*
@@ -152,11 +167,11 @@ function handleSearchMessage(listings) {
  */
 function handleErrorMessage(error) {
     // Show the error panel if it isn't visible yet.
-    if (!$("#error-panel").is(":visible")) {
-        $("#error-panel").slideDown(500);
+    if (!$error_panel.is(":visible")) {
+        $error_panel.slideDown(500);
     }
     // Append a link in the error table to the page that failed to be parsed.
-    $("#error-table").find("tbody").first()
+    $error_table_body
             .append("<tr><td style='text-align: center'><a href='"
                     + error.url + "'><h4><strong>"
                     + error.title + "</strong></h4></a></td></tr>");
@@ -175,7 +190,7 @@ function updateTableFilter() {
      * If the user entered a value above or below a field's min or max value,
      * set the field to the nearest allowed value. 
      */
-    $("#update-filter-panel").find("input").each(function () {
+    $update_filter_inputs.each(function () {
         let val = $(this).val();
         if (val) {
             val = parseFloat(val, 10);
@@ -189,12 +204,12 @@ function updateTableFilter() {
         }
     });
 
-    let price_min = $("#price-min").val();
-    let price_max = $("#price-max").val();
-    let sqft_min = $("#sqft-min").val();
-    let sqft_max = $("#sqft-max").val();
-    let bed_min = $("#bed-min").val();
-    let bed_max = $("#bed-max").val();
+    let price_min = $price_min.val();
+    let price_max = $price_max.val();
+    let sqft_min = $sqft_min.val();
+    let sqft_max = $sqft_max.val();
+    let bed_min = $bed_min.val();
+    let bed_max = $bed_max.val();
 
     /*
      * Make sure that the user didn't enter a higher value 
@@ -225,7 +240,7 @@ function updateTableFilter() {
     } else {
 
         // Empty the current contents of the results table.
-        $("#apartments-table").find("tbody").empty();
+        $apartments_table_body.empty();
 
         for (let i = 0; i < rentals.length; i++) {
             const rental = rentals[i];
@@ -248,11 +263,28 @@ function updateTableFilter() {
             }
         }
         // Notify the tablesorter that the data in the table has changed.
-        $("#apartments-table").trigger("update");
+        $apartments_table.trigger("update");
     }
 }
 
 $(function () { // Document is ready.
+
+    $apartments_table = $("#apartments-table");
+    $apartments_table_body = $apartments_table.find("tbody");
+    $form_panel = $("#form-panel");
+    $results_panel = $("#results-panel");
+    $error_panel = $("#error-panel");
+    $error_table_body = $("#error-table").find("tbody").first();
+    $update_filter_inputs = $("#update-filter-panel").find("input");
+    $price_min = $("#price-min");
+    $price_max = $("#price-max");
+    $sqft_min = $("#sqft-min");
+    $sqft_max = $("#sqft-max");
+    $bed_min = $("#bed-min");
+    $bed_max = $("#bed-max");
+
+    const $folder_input = $("#folder-name");
+    const $submit_button = $("#submit-button");
 
     // Create a custom formatter to use with tablesorter.
     $.tablesorter.addParser({
@@ -273,7 +305,7 @@ $(function () { // Document is ready.
     });
 
     // Add the custom formatter for numbers to several columns:
-    $("#apartments-table").tablesorter({
+    $apartments_table.tablesorter({
         headers: {
             0: {// Monthly Rental Price
                 sorter: 'just_numbers'
@@ -292,20 +324,19 @@ $(function () { // Document is ready.
 
     // Simulate a button click on the 'Go!' button if the user
     // hits 'Enter' while in the bookmarks folder input text box.
-    const $folder_input = $("#folder-name");
+
     $folder_input.keyup(function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
 
-            $("#submit-button").click();
+            $submit_button.click();
         }
     });
 
     // If the 'Go!' button is clicked, try to find the right bookmarks folder
     // and open the bookmarks it contains in new tabs so that they can be parsed.
-    $("#submit-button").on("click", function () {
-        const folder_name = $("#folder-name").val();
-        chrome.bookmarks.getTree(findBookmarks(folder_name));
+    $submit_button.on("click", function () {
+        chrome.bookmarks.getTree(findBookmarks($folder_input.val()));
     });
 
     /*
@@ -331,7 +362,7 @@ $(function () { // Document is ready.
      */
     if (window.location.href.includes("search=false")) {
         // Show the form for selecting a bookmarks folder.
-        $("#form-panel").slideDown(500);
+        $form_panel.slideDown(500);
         // Put the cursor inside the input box
         $folder_input.focus();
     }
