@@ -6,7 +6,12 @@ A Chrome extension is a set of HTML, CSS, and JavaScript files that act like a w
 
 ### The Background Page And The Browser Action
 
-This extension's work is done in a series of steps: obtaining a list of Zillow listings, opening up the listings in separate tabs and parsing them, and then adding the data to a table.  This process begins when the Browser Action is clicked.  The Browser Action is a button that always appears in the upper right-hand corner of Chrome, in the same bar as the URL.  It is specified in the manifest.  Clicking the Browser Action will always open the index page.  If the user's active tab was a Zillow search page when they clicked the Browser Action, the list of listings will be obtained by injecting the search content script into the Zillow search page.  If the user's active tab was not a Zillow search page, the user will need to specify a list of listings from a folder of their bookmarks.  The sole purpose of the non-persistent background script called 'background.js' is to add the listener for click events on the browserAction button. 
+This extension's work is done in a series of steps: 
+* Obtaining a list of Zillow listings
+* Opening up the listings in separate tabs and parsing them
+* Adding the data to a table.  
+
+This process begins when the Browser Action is clicked.  The Browser Action is a button that always appears in the upper right-hand corner of Chrome, in the same bar as the URL.  It is specified in the manifest.  Clicking the Browser Action will always open the index page.  If the user's active tab was a Zillow search page when they clicked the Browser Action, the list of listings will be obtained by injecting the search content script into the Zillow search page.  If the user's active tab was not a Zillow search page, the user will need to specify a list of listings from a folder of their bookmarks.  The sole purpose of the non-persistent background script called 'background.js' is to add the listener for click events on the browserAction button. 
 
 ### Index Page
 
