@@ -2,7 +2,7 @@
 
 A Chrome extension is a set of HTML, CSS, and JavaScript files that act like a web page, but are stored locally in the user's browser.  They can have certain special permission, like being able to inject javascript files called 'content scripts' into certain web pages that a user visits.  These permissions, along with many other configuration details of a chrome extension, are stored in a required file called 'manifest.json'.  Each page within an extension has different permissions, however.  For example, a content script can access and modify the DOM of a page that it is injected into, but cannot create a new tab.  This is done to make Chrome more secure.  To handle this, messages can be passed between the different scripts and pages of a Chrome Extension.
 
-# [Apartment Organizer](https://chrome.google.com/webstore/detail/apartment-organizer-for-z/fhekihlliinkffagbfbdpmjdhlaeghli target="_blank")
+# [Apartment Organizer](https://chrome.google.com/webstore/detail/apartment-organizer-for-z/fhekihlliinkffagbfbdpmjdhlaeghli)
 
 ### The Background Page And The Browser Action
 
