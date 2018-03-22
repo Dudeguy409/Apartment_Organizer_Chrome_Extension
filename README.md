@@ -4,15 +4,15 @@ A Chrome extension is a set of HTML, CSS, and JavaScript files that act like a w
 
 # Apartment Organizer
 
-## The Background Page And The Browser Action
+### The Background Page And The Browser Action
 
 This extension's work is done in a series of steps: obtaining a list of Zillow listings, opening up the listings in separate tabs and parsing them, and then adding the data to a table.  This process begins when the Browser Action is clicked.  The Browser Action is a button that always appears in the upper right-hand corner of Chrome, in the same bar as the URL.  It is specified in the manifest.  Clicking the Browser Action will always open the index page.  If the user's active tab was a Zillow search page when they clicked the Browser Action, the list of listings will be obtained by injecting the search content script into the Zillow search page.  If the user's active tab was not a Zillow search page, the user will need to specify a list of listings from a folder of their bookmarks.  The sole purpose of the non-persistent background script called 'background.js' is to add the listener for click events on the browserAction button. 
 
-## Index Page
+### Index Page
 
 The main page of this Chrome extension is 'index.html', with its accompanying 'index.js'.  The page contains two views: a view for the results and error tables, and a view for selecting a folder of Zillow bookmarks.  Only one of these views is visible at a time.  The index page is the receiver of all messages sent from the content scripts, explained below.
 
-## Content Scripts
+### Content Scripts
 
 To be clear, this extension contains two different types of content scripts, both of which are injected into Zillow pages.  
 
@@ -20,11 +20,11 @@ The first is a listing content script that is injected into a zillow listing pag
 
 The second type of content script is a search content script that is injected into a Zillow search page if the user hits the browser action while the Zillow search page is the active tab.  It grabs the URLs of all of the listings in its search results and reports this list back to the extension's index page so that the index page can open each listing in a separate tab and inject the listing content script into it so that it can be parsed.  The search content script does not have permissions to open tabs itself, and must rely on the index page as a result.
 
-## Creating the Extension
+### Creating the Extension
 
 To create the extension, zip up the 'extension' folder.  Do not include the "Web_Store_Images" folder.  It contains ads to be displayed in the 'featured' bar in the web store, as well as screenshots for the extension's profile page in the web store.
 
-## Additional Info
+### Additional Info
 
 The manifest has a content security policy to allow unsafe evaluating of strings containing JavaScript code.  TableSorter relies on this to function properly.
 
