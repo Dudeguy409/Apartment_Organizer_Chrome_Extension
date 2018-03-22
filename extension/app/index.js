@@ -283,8 +283,6 @@ $(function () { // Document is ready.
     $bed_min = $("#bed-min");
     $bed_max = $("#bed-max");
 
-
-
     const $folder_input = $("#folder-name");
     const $submit_button = $("#submit-button");
 
