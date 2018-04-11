@@ -158,7 +158,9 @@ function handleSearchMessage(listings) {
     for (let i = 0; i < listings.length; i++) {
         openListingTabToParse(listings[i]);
     }
-    $results_panel.slideDown(500);
+    if (!$results_panel.is(":visible")) {
+        $results_panel.slideDown(500);
+    }
 }
 
 /*
