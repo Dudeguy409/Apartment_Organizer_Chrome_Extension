@@ -7,20 +7,51 @@
  * the list as a message to the extension's index page so that the listings can
  * be opened in tabs and parsed by the other content script, listing_content.js.
  */
-$(function () { // Document is ready.
 
+let $cards;
+let $page_list;
+let $current_page;
+
+function parseCurrentlyVisibleListings() {
     const listings = [];
 
-    $("ul.photo-cards").first().children().each(function () {
+    $cards.each(function () {
         const url = $(this).find("a").first().prop("href");
         if (url) {
             listings.push(url);
         }
     });
-
     chrome.extension.sendMessage({listings});
+}
 
+function start() {
+    $cards = $("ul.photo-cards").first().children();
+
+    parseCurrentlyVisibleListings();
+
+    if ($page_list.length) {
+        const $next_page = $current_page.next();
+        if ($next_page.length && $cards.length >= 25) {
+            const search_url = $next_page.find("a").prop("href");
+            chrome.extension.sendMessage({search_url});
+        }
+        if ($current_page.text() !== "1") {
+            window.close();
+        }
+    }
+}
+
+$(function () { // Document is ready.
+    $page_list = $(".zsg-pagination").first();
+    $current_page = $page_list.find(".zsg-pagination_active");
+    if ($page_list.length && $current_page.text() !== "1") {
+        setTimeout(start, 5000);
+    } else {
+        start();
+    }
 });
+
+
 
 
 
