@@ -138,7 +138,6 @@ function appendResultToTable(rental) {
  * result to the rentals list so that they can be used with the table filder.
  */
 function handleResultsMessage(results) {
-
     // Each element in the array represents a rental; 
     // Add a row to the results table for each.
     for (let i = 0; i < results.length; i++) {
@@ -151,16 +150,32 @@ function handleResultsMessage(results) {
 }
 
 /*
- * Handles error messages generated from parsing failures by appending info
- * about the tab to the error table, and showing it if needed. 
+ * Handles messages from search content scripts containing 
+ * a list of listing URLs to parse.
  */
 function handleSearchMessage(listings) {
     for (let i = 0; i < listings.length; i++) {
         openListingTabToParse(listings[i]);
+
     }
     if (!$results_panel.is(":visible")) {
         $results_panel.slideDown(500);
     }
+}
+
+/*
+ * Handles messages from search content scripts of pages with paginated 
+ * results and opens the next page of results in a temporary tab.
+ */
+function handleSearchPaginationMessage(search_url) {
+    /* Set this new tab to be the active tab so that it loads properly */
+    const createProperties = {"active": true, url: search_url};
+    chrome.tabs.create(createProperties, function (tab) {
+        // The content script depends on jQuery, so load it first.
+        chrome.tabs.executeScript(tab.id, {"file": "/lib/jquery.min.js"}, function () {
+            chrome.tabs.executeScript(tab.id, {"file": "/app/search_content.js"});
+        });
+    });
 }
 
 /*
@@ -355,6 +370,8 @@ $(function () { // Document is ready.
             handleSearchMessage(message.listings);
         } else if (message.error) {
             handleErrorMessage(message.error);
+        } else if (message.search_url) {
+            handleSearchPaginationMessage(message.search_url);
         }
     });
 
